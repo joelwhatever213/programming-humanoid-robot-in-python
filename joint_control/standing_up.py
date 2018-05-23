@@ -19,6 +19,7 @@ class StandingUpAgent(PostureRecognitionAgent):
         # YOUR CODE HERE
 
 
+
 class TestStandingUpAgent(StandingUpAgent):
     '''this agent turns off all motor to falls down in fixed cycles
     '''

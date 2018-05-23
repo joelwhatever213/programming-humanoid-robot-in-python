@@ -22,6 +22,7 @@
 
 from pid import PIDAgent
 from keyframes import hello
+from scipy import interpolate
 
 
 class AngleInterpolationAgent(PIDAgent):
@@ -41,6 +42,37 @@ class AngleInterpolationAgent(PIDAgent):
     def angle_interpolation(self, keyframes, perception):
         target_joints = {}
         # YOUR CODE HERE
+        newkeyframes = ([],[],[])
+
+        #time interval 0.01
+        #print keyframes[1][0]       #time
+        #print keyframes[2][0]     #value
+        for i in range(len(keyframes[0])):
+            newkeyframes[0].append(keyframes[0][i])
+            #compute spline
+            def f(x):
+                y_points = []
+                x_points = []
+                for j in range(len(keyframes[1][i])-1):
+                    x_points.append(keyframes[1][i][j])
+                #print x_points
+
+                for j in range(len(keyframes[2][i])):
+                    y_points.append(keyframes[2][i][j][0])
+                print y_points
+
+                tck = interpolate.splrep(x_points, y_points)
+                return interpolate.splev(x, tck)
+
+            #add new values
+            k = keyframes[1][i][0]
+            while k <= len(keyframes[1][i]):
+                keyframes[1][i].append(k)
+                keyframes[2][i].append(f(k))
+                k = k + 0.01
+
+
+
 
         return target_joints
 
