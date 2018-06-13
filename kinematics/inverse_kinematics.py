@@ -24,6 +24,25 @@ class InverseKinematicsAgent(ForwardKinematicsAgent):
         '''
         joint_angles = []
         # YOUR CODE HERE
+        joint_names = []
+        EPS = 0.01
+        h = 0.01
+        endEffectorPosition = []
+        targetPosition = []
+
+
+
+
+        if(effector_name == 'Head'): joint_names = self.chains(Head);
+        elif (effector_name == 'Larm'): joint_names = self.chains(Larm);
+        elif (effector_name == 'Rarm'): joint_names = self.chains(Rarm);
+        elif (effector_name == 'Lleg'): joint_names = self.chains(Lleg);
+        elif (effector_name == 'Rleg'): joint_names = self.chains(Rleg);
+
+
+
+
+
         return joint_angles
 
     def set_transforms(self, effector_name, transform):

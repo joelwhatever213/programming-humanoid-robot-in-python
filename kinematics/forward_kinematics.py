@@ -35,8 +35,12 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         self.transforms = {n: identity(4) for n in self.joint_names}
 
         # chains defines the name of chain and joints of the chain
-        self.chains = {'Head': ['HeadYaw', 'HeadPitch']
+        self.chains = {'Head': ['HeadYaw', 'HeadPitch'],
                        # YOUR CODE HERE
+                        'LArm': ['LShoulderPitch', 'LShoulderPitch', 'LElbowYaw	', 'LElbowRoll	', 'LWristYaw2', 'LHand'],
+                        'LLeg': ['LHipYawPitch', 'LHipRoll', 'LHipPitch', 'LKneePitch', 'LAnklePitch', 'LAnkleRoll'],
+                        'RLeg': ['RHipYawPitch', 'RHipRoll', 'RHipPitch', 'RKneePitch', 'RAnklePitch',  'RAnkleRoll'],
+                        'RArm': ['RShoulderPitch', 'RShoulderPitch', 'RElbowYaw	', 'RElbowRoll	', 'RWristYaw2','RHand'],
                        }
 
     def think(self, perception):
@@ -53,6 +57,61 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         '''
         T = identity(4)
         # YOUR CODE HERE
+        def matrix_roll(angle, x, y, z):
+            sin = np.sin(angle)
+            cos = np.cos(angle)
+            return np.matrix([1,   0,    0, x],
+                             [0, cos, -sin, y],
+                             [0, sin,  cos, z],
+                             [0,    0,    0, 1])
+
+        def matrix_pitch(angle, x, y, z):
+            sin = np.sin(angle)
+            cos = np.cos(angle)
+            return np.matrix([ cos, 0, sin, x],
+                             [   0, 1, 0  , y],
+                             [-sin, 0, cos, z],
+                             [   0, 0,   0, 1])
+
+        def matrix_yaw(angle, x, y, z):
+            sin = np.sin(angle)
+            cos = np.cos(angle)
+            return np.matrix([cos, -sin, 0, x],
+                             [sin,  cos, 0, y],
+                             [  0,    0, 1, z],
+                             [  0,    0, 0, 1])
+
+        if "Roll" in joint_name:
+            if "Shoulder" in joint_name:
+                return matrix_roll(joint_angle, 0, 98.00, 100.00)
+            elif "Elbow" in joint_name:
+                return matrix_roll(joint_angle, 0, 15.00, 0)
+            elif "Hip" in joint_name:
+                return matrix_roll(joint_angle, 0, 50.00, 85.00)
+            elif "Ankle" in joint_name:
+                return matrix_roll(joint_angle, 0, 0, 0)
+
+        if "Pitch" in joint_name:
+            if "Head" in joint_name:
+                return matrix_pitch(joint_angle, 0, 0, 126.50)
+            elif "Shoulder" in joint_name:
+                return matrix_pitch(joint_angle, 0, 98.00, 100.00)
+            elif "Hip" in joint_name and "Yaw" not in joint_name:
+                return matrix_pitch(joint_angle, 0, 50.00, 85.00)
+            elif "Ankle" in joint_name:
+                return matrix_pitch(joint_angle, 0, 0, 0)
+
+
+        if "Yaw" in joint_name:
+            if "Head" in joint_name:
+                return matrix_yaw(joint_angle, 0, 0, 126.50)
+            elif "Elbow" in joint_name:
+                return matrix_yaw(joint_angle, 0, 15.00, 0)
+            elif "Hip" in joint_name:
+                return np.dot(matrix_yaw(joint_angle, 0, 50.00, 85.00), matrix_pitch(joint_angle, 0, 0, 0))
+
+
+
 
         return T
 
@@ -67,7 +126,7 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
                 angle = joints[joint]
                 Tl = self.local_trans(joint, angle)
                 # YOUR CODE HERE
-
+                T = np.dot(T, Tl)
                 self.transforms[joint] = T
 
 if __name__ == '__main__':
